@@ -24,6 +24,7 @@ class BPlusTree:
 
 
     # TODO: add function for inserting into parent and leafs as well
+    # TODO: add function for inserting into parent and leafs as well
     def insert(self, key):
         leaf = self.find_leaf(self.root, key)
         leaf.keys.append(key)
@@ -37,8 +38,10 @@ class BPlusTree:
         if node.is_leaf:
             return node
 
+
         for i, item in enumerate(node.keys):
             if key < item:
+                return self.find_leaf(node.children[i], key)
                 return self.find_leaf(node.children[i], key)
         return self.find_leaf(node.children[-1], key)
 
@@ -55,10 +58,12 @@ class BPlusTree:
             node.children = node.children[:mid_index]
 
         if node == self.root:
+        if node == self.root:
             new_root = Node()
             new_root.keys = [mid_key]
             new_root.children = [node, new_node]
             self.root = new_root
+
 
         else:
             parent = self.find_parent(self.root, node)
@@ -67,6 +72,7 @@ class BPlusTree:
             parent.children.insert(parent.keys.index(mid_key)+1, new_node)
             if len(parent.keys) >= self.max_degree:
                 self.split(parent)
+
 
 
     def find_parent(self, node, child):
