@@ -1,3 +1,6 @@
+import math
+
+
 class Node:
     def __init__(self, is_leaf=False):
         self.is_leaf = is_leaf      # is this node a leaf?
@@ -24,13 +27,97 @@ class BPlusTree:
 
 
     # TODO: add function for inserting into parent and leafs as well
-    def insert(self, key):
-        leaf = self.find_leaf(key)
-        leaf.keys.append(key)
-        leaf.keys.sort()
+    def insert(self, key, pointer):
+        if key == None or pointer == None:
+            print('Inserting None?')
+            return
+        leaf = None
+        if self.root == None:
+            self.root = Node(is_leaf=True)
+            leaf = self.root
+        else:
+            leaf = self.find_leaf(key)
 
-        if len(leaf.keys) >= self.max_degree:
-            self.split(leaf)
+        if len(leaf.keys) < self.max_degree-1:
+            self.insert_leaf(leaf, key, pointer)
+        else:
+            leaf_t = Node(is_leaf=True)
+            temp = self.copy_tempo(leaf)
+            self.insert_leaf(temp, key, pointer)
+
+            if(leaf.children[-1] is Node): 
+                leaf_t.children.append(leaf.children[-1])
+            leaf.children = [leaf_t]
+            leaf.keys.clear()
+
+            border = int(math.ceil(self.max_degree/2))
+
+            leaf.keys = temp.keys[:border]
+            leaf.children = temp.children[:border] + leaf.children
+
+            leaf_t.keys = temp.keys[border:]
+            leaf_t.children += temp.children[border:]   # changed this from book
+
+            k_t = leaf_t.keys[0] 
+            self.insert_parent(leaf, k_t, leaf_t)
+
+
+    def copy_tempo(self, node, full=False):
+        temp = Node(is_leaf= node.is_leaf)
+        c = 0 if full else 1
+        if self.right(node):
+            c = 0
+        temp.keys = node.keys[:]
+        temp.children = node.children[:len(node.children)-c]
+        return temp
+
+
+    def insert_leaf(self, leaf, key, pointer):
+        if leaf == self.root and len(leaf.keys) == 0:
+            leaf.keys = [key]
+            leaf.children = [pointer]
+            return
+
+        if key < leaf.keys[0]:
+            leaf.keys.insert(0, key)
+            leaf.children.insert(0, pointer)
+        else:
+            self.add_key_child(leaf, key, pointer)
+
+
+
+    def insert_parent(self, node, k_t, node_t):
+        if node == self.root:
+            node_r = Node()
+            node_r.keys = [k_t]
+            node_r.children = [node, node_t]
+            self.root = node_r
+            return
+
+        node_p = self.parent(node)
+        if len(node_p.children) < self.max_degree:
+            index = node_p.children.index(node)
+            node_p.children.insert(index+1, node_t)
+            node_p.keys.insert(index, k_t)
+        else:
+
+            temp = self.copy_tempo(node_p, full=True)
+            index = temp.children.index(node)
+            temp.children.insert(index+1, node_t) # test if +1 is needed
+            temp.keys.insert(index, k_t)
+
+            node_p.keys.clear()
+            node_p.children.clear()
+            node_p_t = Node()
+            border = int(math.ceil((self.max_degree+1)/2))
+            node_p.keys = temp.keys[:border-1]
+            node_p.children = temp.children[:border]
+            k_tt = temp.keys[border-1]
+            node_p_t.keys = temp.keys[border:]
+            node_p_t.children = temp.children[border:]
+
+            self.insert_parent(node_p, k_tt, node_p_t)
+
 
 
     def find_leaf(self, key):
@@ -103,13 +190,16 @@ class BPlusTree:
             return
         else_if_condition = len(node.children) < int(math.ceil(self.max_degree/2))
         if node.is_leaf:
+            print("debug3")
             else_if_condition = len(node.keys) < int(math.ceil((self.max_degree-1)/2))
 
         if node == self.root and len(node.children) == 1:
+            print("debug2")
             self.root = node.children[0]
             del node
 
         elif else_if_condition:
+            print("debug")
             node_tempo = self.get_sibs(node)
             parent = self.parent(node)
             index = parent.children.index(node_tempo)
@@ -133,20 +223,27 @@ class BPlusTree:
                         node.children.insert(0, main)
                         parent.keys[parent.keys.index(key_tempo)] = main_key
 
-        else:
-            if not(node.is_leaf) and not(node == self.root):
-                node_tempo.keys.pop(0)
-                main = node_tempo.children.pop(0)
-                node.keys.append(key_tempo)
-                node.children.append(main)
-                parent.keys[parent.keys.index(key_tempo)] = node_tempo.keys[0]
+                    else:
+                        main_key = node_t.keys.pop()
+                        main_child = node_tempo.children.pop()
+                        node.keys.insert(0, main_key)
+                        node.children.insert(0, main_child)
+                        parent.keys[parent.keys.index(key_tempo)] = main_key
 
-            else:
-                main_key = node_tempo.keys.pop(0)
-                main_child = node_tempo.children.pop(0)
-                node.keys.append(main_key)
-                node.children.append(main_child)
-                parent.keys[parent.keys.index(key_tempo)] = node_tempo.keys[0]
+                else:
+                    if not(node.is_leaf) and not(node == self.root):
+                        node_tempo.keys.pop(0)
+                        main = node_tempo.children.pop(0)
+                        node.keys.append(key_tempo)
+                        node.children.append(main)
+                        parent.keys[parent.keys.index(key_tempo)] = node_tempo.keys[0]
+
+                    else:
+                        main_key = node_tempo.keys.pop(0)
+                        main_child = node_tempo.children.pop(0)
+                        node.keys.append(main_key)
+                        node.children.append(main_child)
+                        parent.keys[parent.keys.index(key_tempo)] = node_tempo.keys[0]
 
 
     def is_predum(self, node, node_tempo):
@@ -257,15 +354,15 @@ class BPlusTree:
 
 # Add this if __name__ == "__main__" in case you wanted to import this file for graphical view
 if __name__ == "__main__":
-    # TODO: fix insert
-    tree = BPlusTree(max_degree=4)
-    tree.insert(10)
-    tree.insert(20)
-    tree.insert(5)
-    tree.insert(15)
-    tree.insert(25)
-    tree.insert(11)
-    tree.insert(13)
-    print(tree.get_dict())
-    tree.delete(11, 5)
-    print(tree.get_dict())
+    bpt = BPlusTree(3)
+    bpt.insert(1, 1)
+    bpt.insert(2, 2)
+    bpt.insert(3, 3)
+    bpt.insert(4, 4)
+    bpt.insert(5, 5)
+    bpt.insert(6, 6)
+    bpt.insert(7, 7)
+    bpt.insert(9, 9)
+    print(bpt.get_dict())
+    bpt.delete(1, 1)
+    print(bpt.get_dict())
