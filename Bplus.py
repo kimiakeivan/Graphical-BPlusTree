@@ -26,7 +26,6 @@ class BPlusTree:
         self.max_degree = max_degree
 
 
-    # TODO: add function for inserting into parent and leafs as well
     def insert(self, key, pointer):
         if key == None or pointer == None:
             print('Inserting None?')
