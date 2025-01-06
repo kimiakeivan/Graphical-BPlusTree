@@ -3,9 +3,9 @@ import math
 
 class Node:
     def __init__(self, is_leaf=False):
-        self.is_leaf = is_leaf      
-        self.keys = []              
-        self.children = [] 
+        self.is_leaf = is_leaf      # is this node a leaf?
+        self.keys = []              # for keys
+        self.children = []          #for internal nodes
         # Deleted next and parent cause it's already being supported by Node class keys and children
 
 
@@ -85,7 +85,6 @@ class BPlusTree:
 
 
 
-
     def insert_parent(self, node, k_t, node_t):
         if node == self.root:
             node_r = Node()
@@ -142,12 +141,10 @@ class BPlusTree:
             node.children = node.children[:mid_index]
 
         if node == self.root:
-        if node == self.root:
             new_root = Node()
             new_root.keys = [mid_key]
             new_root.children = [node, new_node]
             self.root = new_root
-
 
         else:
             parent = self.find_parent(self.root, node)
@@ -174,24 +171,6 @@ class BPlusTree:
             if parent:
                 return parent
         return None
-
-
-    def search(self, searchkey):
-        node = self.root
-        while not node.is_leaf:
-            for i, key in enumerate(node.keys):
-                if searchkey < key:
-                    node = node.children[i]
-                    break
-            else:
-                node = node.children[-1]
-
-        for i, key in enumerate(node.keys):
-            if key == searchkey:
-                return True
-        return False
-
-
 
     # TODO: add function to merge nodes after deletion
     def delete(self, key, child):
@@ -362,6 +341,9 @@ class BPlusTree:
         node_tempo.children.insert(position, child)
 
 
+    def search(self):
+        pass
+
 
     def get_dict(self):
         if self.root == None:
@@ -383,4 +365,3 @@ if __name__ == "__main__":
     print(bpt.get_dict())
     bpt.delete(1, 1)
     print(bpt.get_dict())
-
