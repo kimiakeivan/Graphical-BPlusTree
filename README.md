@@ -10,7 +10,7 @@ A Python implementation of a B+ Tree data structure with an interactive GUI visu
 
 
 
-## Featuresho
+## Features
 
 - Interactive GUI built with CustomTkinter
 - Visual representation of B+ Tree structure
@@ -37,6 +37,7 @@ A Python implementation of a B+ Tree data structure with an interactive GUI visu
 ## Installation
 1. Clone this repository
 2. Install the required dependencies:
+pip install customtkinter matplotlib networkx pydot graphviz
 3. Ensure Graphviz is installed on your system:
    - Windows: Download from [Graphviz Official Website](https://graphviz.org/download/)
    - Linux: `sudo apt-get install graphviz`
@@ -45,8 +46,6 @@ A Python implementation of a B+ Tree data structure with an interactive GUI visu
 
 
 ## Usage
-Run the program:
-pip install customtkinter matplotlib networkx pydot graphviz
 Run the program:
 python Bplus.py
 
