@@ -1,5 +1,0 @@
-pip install matplotlib
-pip install graphviz_layout
-pip install pydot
-pip install networkx
-pip install customtkinter
