@@ -3,7 +3,7 @@
 A Python implementation of a B+ Tree data structure with an interactive GUI visualizer. This project provides a visual way to understand how B+ Trees work and perform various operations on them.
 
 
-![B+ Tree GUI](screenshots/bplus.png)
+![B+ Tree GUI](./screenshot/bplus.png)
 
 
 
